@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+/V_BUILD
+/V_KM/.vs
+/V_KM/.vs
+/V_KM/.vs
+/V_BUILD
+*.pdb
+V_BUILD/V_KM/V_KM.sys
+/V_KM/.vs

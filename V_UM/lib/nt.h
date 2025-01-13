@@ -1,6 +1,24 @@
 #include <Windows.h>
 #include <stdio.h>
 
+typedef struct _IO_STATUS_BLOCK
+{
+    union
+    {
+        NTSTATUS Status;
+        PVOID Pointer;
+    };
+    ULONG_PTR Information;
+} IO_STATUS_BLOCK, * PIO_STATUS_BLOCK;
+
+
+typedef VOID(NTAPI* PIO_APC_ROUTINE)(
+    _In_ PVOID ApcContext,
+    _In_ PIO_STATUS_BLOCK IoStatusBlock,
+    _In_ ULONG Reserved
+    );
+
+
 typedef enum _SYSTEM_INFORMATION_CLASS
 {
     SystemBasicInformation, // q: SYSTEM_BASIC_INFORMATION
@@ -412,7 +430,7 @@ typedef struct _RTL_PROCESS_MODULES
 } RTL_PROCESS_MODULES, * PRTL_PROCESS_MODULES;
 
 //0xa0 bytes (sizeof)
-struct _KLDR_DATA_TABLE_ENTRY
+inline struct _KLDR_DATA_TABLE_ENTRY
 {
     struct _LIST_ENTRY InLoadOrderLinks;                                    //0x0
     VOID* ExceptionTable;                                                   //0x10
@@ -443,7 +461,7 @@ struct _KLDR_DATA_TABLE_ENTRY
     ULONG TimeDateStamp;                                                    //0x9c
 } KLDR_DATA_TABLE_ENTRY, * PKLDR_DATA_TABLE_ENTRY;
 
-struct _PEB_LDR_DATA
+inline struct _PEB_LDR_DATA
 {
     ULONG Length;                                                           //0x0
     UCHAR Initialized;                                                      //0x4
@@ -456,7 +474,7 @@ struct _PEB_LDR_DATA
     VOID* ShutdownThreadId;                                                 //0x50
 }PEB_LDR_DATA, * PPEB_LDR_DATA;
 
-struct _PEB
+typedef struct _PEB
 {
     UCHAR InheritedAddressSpace;                                            //0x0
     UCHAR ReadImageFileExecOptions;                                         //0x1
