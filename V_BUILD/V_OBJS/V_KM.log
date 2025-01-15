@@ -1,12 +1,13 @@
 ﻿  Building 'V_KM' with toolset 'WindowsKernelModeDriver10.0' and the 'Universal' target platform.
 C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(516,5): warning MSB8004: Intermediate Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Intermediate Directory.
 C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(517,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(531,5): warning MSB8028: The intermediate directory (..\V_BUILD\V_OBJS\) contains files shared from another project (V_UM.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   Source.cpp
-D:\Driver\V_KM\Source.cpp(185,37): warning C4100: 'DeviceObject': unreferenced formal parameter
-D:\Driver\V_KM\Source.cpp(200,57): warning C4100: 'Irp': unreferenced formal parameter
-D:\Driver\V_KM\Source.cpp(211,63): warning C4100: 'RegPath': unreferenced formal parameter
-D:\Driver\V_KM\Source.cpp(236,78): warning C4100: 'RegistryPath': unreferenced formal parameter
-D:\Driver\V_KM\Source.cpp(236,48): warning C4100: 'DriverObject': unreferenced formal parameter
+D:\Driver\V_KM\Source.cpp(252,37): warning C4100: 'DeviceObject': unreferenced formal parameter
+D:\Driver\V_KM\Source.cpp(267,57): warning C4100: 'Irp': unreferenced formal parameter
+D:\Driver\V_KM\Source.cpp(278,63): warning C4100: 'RegPath': unreferenced formal parameter
+D:\Driver\V_KM\Source.cpp(303,78): warning C4100: 'RegistryPath': unreferenced formal parameter
+D:\Driver\V_KM\Source.cpp(303,48): warning C4100: 'DriverObject': unreferenced formal parameter
   V_KM.vcxproj -> D:\Driver\V_BUILD\V_KM.sys
   Driver is 'Universal'.
   Inf2Cat task was skipped as there were no inf files to process
