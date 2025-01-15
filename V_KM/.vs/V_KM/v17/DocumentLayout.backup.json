@@ -4,6 +4,16 @@
   "Documents": [
     {
       "AbsoluteMoniker": "D:0:0:{ADBB46E6-18C3-4E5E-8065-F5CFA972C5C3}|..\\V_UM\\V_UM.vcxproj|D:\\Driver\\V_UM\\Source.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADBB46E6-18C3-4E5E-8065-F5CFA972C5C3}|..\\V_UM\\V_UM.vcxproj|D:\\Driver\\V_UM\\lib\\nt.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{ADBB46E6-18C3-4E5E-8065-F5CFA972C5C3}|..\\V_UM\\V_UM.vcxproj|D:\\Driver\\V_UM\\lib\\Driver.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9BA2D4BB-BF8C-41E6-9199-C9DDC65B0807}|V_KM.vcxproj|D:\\Driver\\V_KM\\Source.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{9BA2D4BB-BF8C-41E6-9199-C9DDC65B0807}|V_KM.vcxproj|solutionrelative:Source.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -13,8 +23,47 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 3,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "nt.h",
+              "DocumentMoniker": "D:\\Driver\\V_UM\\lib\\nt.h",
+              "RelativeDocumentMoniker": "..\\V_UM\\lib\\nt.h",
+              "ToolTip": "D:\\Driver\\V_UM\\lib\\nt.h",
+              "RelativeToolTip": "..\\V_UM\\lib\\nt.h",
+              "ViewState": "AgIAABsCAAAAAAAAAAAEwDMCAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-01-13T09:21:21.043Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Source.cpp",
+              "DocumentMoniker": "D:\\Driver\\V_KM\\Source.cpp",
+              "RelativeDocumentMoniker": "Source.cpp",
+              "ToolTip": "D:\\Driver\\V_KM\\Source.cpp",
+              "RelativeToolTip": "Source.cpp",
+              "ViewState": "AgIAAMYAAAAAAAAAAAAAAOEAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-01-13T09:14:24.529Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Driver.hpp",
+              "DocumentMoniker": "D:\\Driver\\V_UM\\lib\\Driver.hpp",
+              "RelativeDocumentMoniker": "..\\V_UM\\lib\\Driver.hpp",
+              "ToolTip": "D:\\Driver\\V_UM\\lib\\Driver.hpp",
+              "RelativeToolTip": "..\\V_UM\\lib\\Driver.hpp",
+              "ViewState": "AgIAAAQBAAAAAAAAAAAmwCQBAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-01-13T08:39:56.372Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -23,7 +72,7 @@
               "RelativeDocumentMoniker": "..\\V_UM\\Source.cpp",
               "ToolTip": "D:\\Driver\\V_UM\\Source.cpp",
               "RelativeToolTip": "..\\V_UM\\Source.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAARAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-12-23T01:34:07.982Z",
               "EditorCaption": ""

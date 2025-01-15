@@ -3,6 +3,7 @@
 
 const ULONG C_DMA CTL_CODE(FILE_DEVICE_UNKNOWN, 0x591, METHOD_BUFFERED, FILE_SPECIAL_ACCESS);
 const ULONG C_CLOSE CTL_CODE(FILE_DEVICE_UNKNOWN, 0x592, METHOD_BUFFERED, FILE_SPECIAL_ACCESS);
+
 const int v_key = 814957;
 
 #define PageOffsetSize 12
@@ -22,12 +23,34 @@ struct Request {
 	ULONGLONG VA;
 	ULONGLONG BUFFER;
 	ULONGLONG Size;
+	enum e_DMA_TYPE
+	{
+		read,
+		write
+	} DMA_TYPE;
 };
+
 
 NTSTATUS ReadPhysicalAddress(PVOID TargetAddress, PVOID Buffer, SIZE_T Size, SIZE_T* BytesRead) {
 	MM_COPY_ADDRESS x = { 0 };
 	x.PhysicalAddress.QuadPart = (LONGLONG)TargetAddress;
 	return MmCopyMemory(Buffer, x, Size, MM_COPY_MEMORY_PHYSICAL, BytesRead);
+}
+
+NTSTATUS WritePhysicalAddress(PVOID TargetAddress, PVOID Buffer, SIZE_T Size)
+{
+	PHYSICAL_ADDRESS x = { 0 };
+	x.QuadPart = LONGLONG(TargetAddress);
+
+	PVOID pmapped_mem = MmMapIoSpaceEx(x, Size, PAGE_READWRITE);
+
+	if (!pmapped_mem)
+		return STATUS_UNSUCCESSFUL;
+
+	memcpy(pmapped_mem, Buffer, Size);
+
+	MmUnmapIoSpace(pmapped_mem, Size);
+	return STATUS_SUCCESS;
 }
 
 UINT64 ExGetCurrentUserDirectoryTableBase() {
@@ -146,6 +169,37 @@ NTSTATUS ReadProcessMemory(int PID, ULONGLONG Address, ULONGLONG Buffer, SIZE_T 
 	return STATUS_SUCCESS;
 }
 
+NTSTATUS WriteProcessMemory(int PID, ULONGLONG Address, ULONGLONG Buffer, SIZE_T Size)
+{
+	if (!PID || !Address || !Buffer || Size == 0)
+		return STATUS_INVALID_PARAMETER;
+
+	PEPROCESS Process;
+	if (!NT_SUCCESS(PsLookupProcessByProcessId((HANDLE)PID, &Process)))
+		return STATUS_UNSUCCESSFUL;
+
+
+	UINT64 DTB = ExGetProcessDataDirectoryTableBase(Process);
+	ObDereferenceObject(Process);
+	if (!DTB)
+
+		return STATUS_UNSUCCESSFUL;
+
+
+	UINT64 v_Address = TranslateLinearAddress(DTB, Address);
+	if (!v_Address)
+		return STATUS_UNSUCCESSFUL;
+
+
+
+	ULONG64 v_Size = min((PAGE_SIZE - (v_Address & 0xFFF)), Size);
+
+	PVOID bufferPointer = (PVOID)(ULONG64)Buffer;
+	WritePhysicalAddress((PVOID)v_Address, bufferPointer, v_Size);
+	DbgPrintEx(0, 0, "wrote -> %p", bufferPointer);
+	return STATUS_SUCCESS;
+}
+
 
 NTSTATUS IrpHandler(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 {
@@ -160,7 +214,20 @@ NTSTATUS IrpHandler(PDEVICE_OBJECT DeviceObject, PIRP Irp)
 		auto vRequest = (Request*)Irp->AssociatedIrp.SystemBuffer;
 		if (!(IoGetCurrentIrpStackLocation(Irp)->Parameters.DeviceIoControl.InputBufferLength == sizeof(Request))) { break; }
 		if ((vRequest->t_key != v_key)) { break; }
-		ReadProcessMemory(vRequest->t_PID, vRequest->VA, vRequest->BUFFER, vRequest->Size);
+		switch (vRequest->DMA_TYPE)
+		{
+		case vRequest->read:
+			ReadProcessMemory(vRequest->t_PID, vRequest->VA, vRequest->BUFFER, vRequest->Size);
+			break;
+
+		case vRequest->write:
+			WriteProcessMemory(vRequest->t_PID, vRequest->VA, vRequest->BUFFER, vRequest->Size);
+
+		break;
+		default:
+			break;
+		}
+
 		break;
 	}
 	

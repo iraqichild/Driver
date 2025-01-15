@@ -26,6 +26,14 @@ typedef NTSTATUS(NTAPI* NtDeviceIoControlFilePTR)(
     _In_ ULONG OutputBufferLength
     );
 
+typedef NTSTATUS(NTAPI* NtQueryInformationProcessPTR)(
+        _In_ HANDLE ProcessHandle,
+        _In_ PROCESSINFOCLASS ProcessInformationClass,
+        _Out_writes_bytes_(ProcessInformationLength) PVOID ProcessInformation,
+        _In_ ULONG ProcessInformationLength,
+        _Out_opt_ PULONG ReturnLength
+    );
+
 #define STATUS_SUCCESS  ((NTSTATUS)0x00000000L)
 
 #define GENERIC_RW (GENERIC_READ | GENERIC_WRITE)
@@ -43,6 +51,7 @@ private:
 
     NtQuerySystemInformationPTR NtQuerySystemInformation;
     NtDeviceIoControlFilePTR NtDeviceIoControlFile;
+    NtQueryInformationProcessPTR NtQueryInformationProcess;
 
     struct Request {
         int t_key;
@@ -50,7 +59,13 @@ private:
         ULONGLONG VA;
         ULONGLONG BUFFER;
         ULONGLONG Size;
+        enum e_DMA_TYPE
+        {
+            read,
+            write
+        } DMA_TYPE;
     };
+
 
     std::chrono::steady_clock::time_point lastReadTime;
     const std::chrono::microseconds readRateLimit = std::chrono::microseconds(1); 
@@ -63,6 +78,7 @@ public:
         {
             NtQuerySystemInformation = (NtQuerySystemInformationPTR)GetProcAddress(ntdll, "NtQuerySystemInformation");
             NtDeviceIoControlFile = (NtDeviceIoControlFilePTR)GetProcAddress(ntdll, "NtDeviceIoControlFile");
+            NtQueryInformationProcess = (NtQueryInformationProcessPTR)GetProcAddress(ntdll, "NtQueryInformationProcess");
         }
 
     }
@@ -104,7 +120,7 @@ public:
             NULL,
             NULL,
             &IoStatusBlock,
-            C_CLOSE,
+            dwIoControlCode,
             lpInBuffer,
             nInBufferSize,
             0,
@@ -165,6 +181,22 @@ public:
         return 0;
     }
 
+    uintptr_t GetProcessPEBAddress()
+    {
+        HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, this->t_pid);
+        if (!hProcess)
+            return 0;
+
+        PROCESS_BASIC_INFORMATION pbi;
+        ULONG len = 0;
+        NtQueryInformationProcess(hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), &len);
+
+        ::CloseHandle(hProcess);
+
+        return (uintptr_t)pbi.PebBaseAddress;
+    }
+
+
     uint64_t GetKernelModuleBase(const char* ModuleName)
     {
 
@@ -217,10 +249,10 @@ public:
     void ReadPhysicalMemory(PVOID Address, PVOID Buffer, SIZE_T BufferSize)
     {
         // prvent the bsods lmao
-        auto now = std::chrono::steady_clock::now();
-        if (now - lastReadTime < readRateLimit) {
-            std::this_thread::sleep_for(readRateLimit - (now - lastReadTime));
-        }
+       // auto now = std::chrono::steady_clock::now();
+       // if (now - lastReadTime < readRateLimit) {
+       //     std::this_thread::sleep_for(readRateLimit - (now - lastReadTime));
+       // }
 
         Request In = { };
         In.t_key = this->t_key;
@@ -228,19 +260,38 @@ public:
         In.VA = (ULONGLONG)Address;
         In.BUFFER = (ULONGLONG)Buffer;
         In.Size = BufferSize;
+        In.DMA_TYPE = In.read;
 
         this->DeviceIoControl(this->t_handle, C_DMA, &In, sizeof(In), nullptr, 0, 0, 0);
 
-        lastReadTime = std::chrono::steady_clock::now();
+        //lastReadTime = std::chrono::steady_clock::now();
+    }
+
+    void WritePhysicalMemory(PVOID Address, PVOID Buffer, SIZE_T BufferSize)
+    {
+        Request In = { };
+        In.t_key = this->t_key;
+        In.t_PID = this->t_pid;
+        In.VA = (ULONGLONG)Address;
+        In.BUFFER = (ULONGLONG)Buffer;
+        In.Size = BufferSize;
+        In.DMA_TYPE = In.write;
+
+        this->DeviceIoControl(this->t_handle, C_DMA, &In, sizeof(In), nullptr, 0, 0, 0);
     }
 
     template <typename BUF> BUF Read(uint64_t Address)
     {
         BUF TMP = { };
         this->ReadPhysicalMemory((PVOID)Address, &TMP, sizeof(BUF));
-        if (TMP != sizeof(BUF))
-            throw 0xDEADBEEF;
         return TMP;
+    }
+
+    template <typename T>
+    T Write(uint64_t address, T buffer) {
+
+        WritePhysicalMemory((PVOID)address, &buffer, sizeof(T));
+        return buffer;
     }
 
 } Driver;
