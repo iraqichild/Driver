@@ -1,6 +1,7 @@
 #include <ntifs.h>
 #include <ntddk.h>
 
+<<<<<<< HEAD
 typedef struct _LDR_DATA_TABLE_ENTRY
 {
     LIST_ENTRY InLoadOrderLinks;
@@ -100,6 +101,17 @@ typedef struct _PEB {
     unsigned char TlsExpansionBitmapBits[0x80];
     ULONG SessionId;
 } PEB, * PPEB;
+=======
+const ULONG C_DMA CTL_CODE(FILE_DEVICE_UNKNOWN, 0x591, METHOD_BUFFERED, FILE_SPECIAL_ACCESS);
+const ULONG C_CLOSE CTL_CODE(FILE_DEVICE_UNKNOWN, 0x592, METHOD_BUFFERED, FILE_SPECIAL_ACCESS);
+const int v_key = 814957;
+
+#define PageOffsetSize 12
+static const UINT64 PageMask = (~0xfull << 8) & 0xfffffffffull;
+//static const ULONG64 PageMask = 0x0000fffffffff000;
+
+UNICODE_STRING NT_DEVICE_NAME, DOS_DEVICE_NAME;
+>>>>>>> parent of b3be6c2 (dohickys)
 
 NTSTATUS UnloadDriver(PDEVICE_OBJECT DeviceObject, PIRP Irp);
 NTSTATUS ReadPhysicalAddress(PVOID TargetAddress, PVOID Buffer, SIZE_T Size, SIZE_T* BytesRead);
@@ -132,6 +144,7 @@ typedef struct _REQUEST {
     } TYPE;
 } REQUEST, * PREQUEST;
 
+<<<<<<< HEAD
 namespace KGLOBAL
 {
     UNICODE_STRING NT_DEVICE_NAME, DOS_DEVICE_NAME;
@@ -294,12 +307,23 @@ namespace KAttached
     }
 }
 
+=======
+struct Request {
+	int t_key;
+	INT32 t_PID;
+	ULONGLONG VA;
+	ULONGLONG BUFFER;
+	ULONGLONG Size;
+};
+
+>>>>>>> parent of b3be6c2 (dohickys)
 NTSTATUS ReadPhysicalAddress(PVOID TargetAddress, PVOID Buffer, SIZE_T Size, SIZE_T* BytesRead) {
     MM_COPY_ADDRESS x = { 0 };
     x.PhysicalAddress.QuadPart = (LONGLONG)TargetAddress;
     return MmCopyMemory(Buffer, x, Size, MM_COPY_MEMORY_PHYSICAL, BytesRead);
 }
 
+<<<<<<< HEAD
 NTSTATUS WritePhysicalAddress(PVOID TargetAddress, PVOID Buffer, SIZE_T Size)
 {
     PHYSICAL_ADDRESS x = { 0 };
@@ -310,6 +334,43 @@ NTSTATUS WritePhysicalAddress(PVOID TargetAddress, PVOID Buffer, SIZE_T Size)
     memcpy(pmapped_mem, Buffer, Size);
     MmUnmapIoSpace(pmapped_mem, Size);
     return STATUS_SUCCESS;
+=======
+UINT64 ExGetCurrentUserDirectoryTableBase() {
+	RTL_OSVERSIONINFOW VersionInfo = { 0 };
+	RtlGetVersion(&VersionInfo);
+
+	if (VersionInfo.dwMajorVersion == 10) {
+		if (VersionInfo.dwMinorVersion == 0) {
+			if (VersionInfo.dwBuildNumber >= 17134 && VersionInfo.dwBuildNumber <= 17763) {
+				return 0x0278;
+			}
+			else if (VersionInfo.dwBuildNumber >= 18362 && VersionInfo.dwBuildNumber <= 18363) {
+				return 0x0280;
+			}
+			else if (VersionInfo.dwBuildNumber >= 19041 && VersionInfo.dwBuildNumber <= 19043) {
+				return 0x0388;
+			}
+		}
+	}
+
+	return 0x0388;
+}
+
+UINT64 ExGetProcessDataDirectoryTableBase(PEPROCESS Process) {
+	if (!Process)
+		return NULL;
+
+	UINT64 DTB = *(uintptr_t*)((UINT8*)Process + 0x28);
+	if (!DTB)
+	{
+		DTB = *(uintptr_t*)((UINT8*)Process + ExGetCurrentUserDirectoryTableBase());
+	}
+
+	if (!DTB)
+		return 0;
+
+	return DTB;
+>>>>>>> parent of b3be6c2 (dohickys)
 }
 
 UINT64 TranslateLinearAddress(UINT64 DirectoryTableBase, UINT64 VirtualAddress) {
@@ -455,6 +516,7 @@ NTSTATUS IrpControl(PDEVICE_OBJECT pDeviceObject, PIRP pIrp)
     return status;
 }
 
+<<<<<<< HEAD
 NTSTATUS DispatchHandler(PDEVICE_OBJECT pDeviceObject, PIRP pIrp)
 {
     PIO_STACK_LOCATION Stack = IoGetCurrentIrpStackLocation(pIrp);
@@ -481,6 +543,41 @@ NTSTATUS UnloadDriver(PDEVICE_OBJECT pDeviceObject, PIRP pIrp)
     }
     DbgPrint("[) Unloaded ");
     return STATUS_SUCCESS;
+=======
+
+NTSTATUS IrpHandler(PDEVICE_OBJECT DeviceObject, PIRP Irp)
+{
+	UNREFERENCED_PARAMETER(DeviceObject);
+
+	ULONG IoControlCode = IoGetCurrentIrpStackLocation(Irp)->Parameters.DeviceIoControl.IoControlCode;
+
+	switch (IoControlCode)
+	{
+	case C_DMA:
+	{ 
+		auto vRequest = (Request*)Irp->AssociatedIrp.SystemBuffer;
+		if (!(IoGetCurrentIrpStackLocation(Irp)->Parameters.DeviceIoControl.InputBufferLength == sizeof(Request))) { break; }
+		if ((vRequest->t_key != v_key)) { break; }
+		ReadProcessMemory(vRequest->t_PID, vRequest->VA, vRequest->BUFFER, vRequest->Size);
+		break;
+	}
+	
+	case C_CLOSE:
+	{
+		UnloadDriver(DeviceObject, Irp);
+		break;
+	}
+	
+
+	default:
+		break;
+	}
+
+	Irp->IoStatus.Status = STATUS_SUCCESS;
+	Irp->IoStatus.Information = 0;
+	IoCompleteRequest(Irp, IO_NO_INCREMENT);
+	return Irp->IoStatus.Status;
+>>>>>>> parent of b3be6c2 (dohickys)
 }
 
 NTSTATUS FxDriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegPath)

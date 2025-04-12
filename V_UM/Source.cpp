@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include <Windows.h>
 #include <string>
 #include <iostream>
@@ -93,10 +94,17 @@ public:
         return DeviceIoControl(hDevice, IOCTL_DMA, &req, sizeof(req), &req, sizeof(req), NULL, NULL);
     }
 };
+=======
+#include <windows.h>
+#include <iostream>
+#include <string>
+#include <TlHelp32.h>
+>>>>>>> parent of b3be6c2 (dohickys)
 
 
 int main()
 {
+<<<<<<< HEAD
     cMemory Memory;
     if (!Memory.Open())
         return -1;
@@ -120,5 +128,8 @@ int main()
     Memory.Detach();
     Memory.Close();
 
+=======
+  
+>>>>>>> parent of b3be6c2 (dohickys)
     return 0;
 }
